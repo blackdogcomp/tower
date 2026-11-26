@@ -257,7 +257,7 @@ abyss:{t:()=>`<p>בוץ. בריכה שחורה. אבני חן מנצנצות ב�
 abyss_win:{once:h=>{h.treasure.push(['אבני חן מן התהום',50]);return 'אבני חן בשווי 500 כסף.';},t:()=>`<p>היצור צונח לבריכה. בין האבנים – חופן אבני חן, שוות לפחות חמש מאות מטבעות כסף. הטיפוס חזרה ארוך, ו{ידיך|ידייך} רועדות.</p>`,c:[{t:'לטפס בחזרה',go:'chasm'}]},
 dust:{t:()=>`<p>הצד השני. אבק עבה, שלא נגעו בו שנים. המסדרון ממשיך, ובסופו דלת בצד המערבי. ערפל כתום וחלוש זולג מתחתיה בזרם דקיק.</p>`,c:[{t:'אל הדלת',go:'mist'}]},
 corrE:{t:()=>`<p>המסדרון פונה מזרחה, ונשבר בעיקול חד. מעבר לעיקול – אור מהבהב, וריח של בשר חרוך.</p>`,
- c:[{t:'לחפש בקירות העיקול',if:h=>!h.f.secret,test:{k:'d6',n:1,thief:1,l:'חיפוש'},w:1,ok:'secret',no:'corrE',nomsg:'אבן, טיח, עובש. כלום.'},{t:'אל הדלת הסודית',if:h=>h.f.secret,go:'secret'},{t:'אל האור',go:'quarters',if:h=>!h.f.gob2},{t:'מגורי הגובלינים',go:'quarters_done',if:h=>h.f.gob2},{t:'בחזרה למבואה',go:'back_hall'}]},
+ c:[{t:'לחפש בקירות העיקול',one:'sec',if:h=>!h.f.secret,test:{k:'d6',n:1,thief:1,l:'חיפוש'},w:1,ok:'secret',no:'corrE',nomsg:'אבן, טיח, עובש. אין כאן דבר.'},{t:'אל הדלת הסודית',if:h=>h.f.secret,go:'secret'},{t:'אל האור',go:'quarters',if:h=>!h.f.gob2},{t:'מגורי הגובלינים',go:'quarters_done',if:h=>h.f.gob2},{t:'בחזרה למבואה',go:'back_hall'}]},
 quarters:{t:()=>`<p>חדר שישה על שישה, בלי יציאות. במרכזו חבית ובה אש. גובלין אחד פושט את עורה של ארנבת, השני מזין את האש בדפים מספר עתיק. מצעים של עשב יבש ושמיכות שורצות קרציות.</p><p>הם מבחינים בך וזועקים – ספק קריאת קרב, ספק זעקת אימה.</p>`,c:[{t:'להילחם',fight:'gob2'}]},
 quarters_win:{once:h=>{const s=R(2,6);h.silver+=s;h.f.gob2=1;if(h.cls==='mu')h.f.learn=1;return 'בכיסיהם '+s+' כסף.';},t:()=>`<p>בין הגחלים – שרידי דפים חרוכים. בחינה מדוקדקת חושפת את שם בעלת הספר: <b>“רנאגה, הקוסמת מן העמק.”</b></p><p>${S.h.cls==='mu'?'לחש אחד שרד את האש. אפשר להעתיק אותו לספר שלך.':'הכתב צפוף ומוזר, ואינו אומר לך דבר.'}</p>`,
  c:[{t:'להעתיק את הלחש: מגן',if:h=>h.f.learn&&!h.spells.includes('shield'),fx:h=>{h.spells.push('shield');h.f.learn=0;},go:'quarters_done'},{t:'להעתיק את הלחש: אור',if:h=>h.f.learn&&!h.spells.includes('light'),fx:h=>{h.spells.push('light');h.f.learn=0;},go:'quarters_done'},{t:'להמשיך',if:h=>!h.f.learn,go:'quarters_done'}]},
@@ -275,26 +275,26 @@ tunnel_end:{t:()=>`<p>המחילה נגמרת בסוף מסדרון מאובק. 
 mist:{t:()=>`<p>ערפל חלוש וכתום יוצא מסף הדלת. ריח של אדמה ישנה. קר כאן מדי לחודש הזה.</p>`,c:[{t:'לפתוח את הדלת',go:'guards',if:h=>!h.f.skel},{t:'אל השומרים שנפלו',go:'guards_done',if:h=>h.f.skel}]},
 guards:{t:()=>`<p>מסדרון פונה מערבה, רוחבו ארבעה מטרים, ובסופו דלת אבן כפולה. האוויר מחניק. ערפל כתום דליל על הרצפה.</p><p>ליד הדלתות מביטים בך, בלי נשמה, שני שלדים בשריון שרשראות עתיק. בידיהם חרבות ארוכות ומגנים. בדממת המתים הם מתעוררים – ונעים לעברך.</p>`,c:[{t:'להילחם',fight:'skel'}]},
 guards_done:{t:()=>`<p>ערימות עצמות ושריון חלוד. הדלת הכפולה נעולה. האוויר עוד מחניק.</p>`,
- c:[{t:'לחפש בערפל',if:h=>!h.items.key1,w:1,go:'key1'},{t:'לפתוח את הדלתות במפתח',if:h=>h.items.key1,go:'stairs2'},{t:'לפרוץ את המנעול',if:h=>h.cls==='thief'&&!h.items.key1,test:{k:'skill',s:'locks'},ok:'stairs2',no:'guards_done',nomsg:'המנעול עתיק ועקשן.'}]},
+ c:[{t:'לחפש בערפל',if:h=>!h.items.key1,w:1,go:'key1'},{t:'לפתוח את הדלתות במפתח',if:h=>h.items.key1,go:'stairs2'},{t:'לפרוץ את המנעול',one:'lock1',if:h=>h.cls==='thief'&&!h.items.key1,test:{k:'skill',s:'locks'},ok:'stairs2',no:'guards_done',nomsg:'המנעול עתיק ועקשן, והוא לא ייכנע לך.'}]},
 key1:{once:h=>{h.items.key1=1;return 'מפתח אבן כבד.';},t:()=>`<p>בתוך הערפל, על הרצפה: תיבה קטנה. בתוכה מפתח כבד, עשוי אבן.</p>`,c:[{t:'לפתוח את הדלת הכפולה',go:'stairs2'}]},
 stairs2:{once:h=>{h.floor=2;h.f.curse=0;return '';},t:()=>`<p>מדרגות יורדות. משב רוח קל חולף על {פניך|פנייך}, ואור הלפיד רוקד. עם כל צעד ברור יותר: כאן קר יותר מאשר למעלה. האבק נדבק ללחות והפך לעיסה של בוץ דליל.</p><p><b>הקטקומבות.</b></p>`,c:[{t:'לרדת',go:'statue'}]},
 statue:{t:()=>`<p>אולם קטן, שתים־עשרה על עשרה. לפיד אחד לא מספיק להאיר אותו. על הקירות ציורים גסים של גולגולות מחייכות, של גזעים שונים.</p><p>במרכז – פסל ברזל חלוד של אישה צעירה בגלימות. בידה הימנית מטה שבקצהו גולה, ובשמאלית – קערית. פניה כמעט נמחקו, אבל שפתיה עדיין אכזריות.</p><div class="quote">“מבורכת העיר שכל הקוסמים בה מתים, וארור הקבר בו הם נקברים – אך זאת תאמרו רק באפלה, כי האומץ ייגזל מכם במהרה.”</div>`,
- c:[{t:'להתעמק בכתובת',if:h=>!h.f.lore,test:{k:'ab',a:'int'},ok:'lore',no:'statue',nomsg:'המילים מוכרות, אבל הזיכרון לא מגיע.'},{t:'לחפש בפסל',if:h=>!h.f.orb,test:{k:'d6',n:2,thief:1,l:'חיפוש'},w:1,ok:'orb',no:'statue',nomsg:'ברזל קר וחלוד.'},
+ c:[{t:'להתעמק בכתובת',one:'lore',if:h=>!h.f.lore,test:{k:'ab',a:'int'},ok:'lore',no:'statue',nomsg:'המילים מוכרות, אבל הזיכרון לא מגיע.'},{t:'לחפש בפסל',one:'orb',if:h=>!h.f.orb,test:{k:'d6',n:2,thief:1,l:'חיפוש'},w:1,ok:'orb',no:'statue',nomsg:'ברזל קר וחלוד.'},
   {t:'לנוח מעט',if:h=>!h.f.rest2||h.diff==='story',rest:2},{t:'הדלת הרקובה במערב',go:'store'},{t:'הדלת המחוזקת בברזל',go:'corr2'}]},
 lore:{once:h=>{h.f.lore=1;return '';},t:()=>`<p>החלק הראשון הוא פתגם עתיק, מהימים שבהם קוסמים נרדפו בערים הגדולות ונאלצו להימלט ולמצוא מקומות מסתור. הפסל הזה לא הוצב כאן לכבוד. הוא הוצב כאזהרה.</p>`,c:[{t:'להמשיך',go:'statue'}]},
 orb:{t:()=>`<p>הגולה שבקצה המטה זזה מעט תחת {אצבעותיך|אצבעותייך}. אפשר להבריג אותה החוצה.</p>`,c:[{t:'להבריג',go:'orb2'},{t:'להשאיר',go:'statue'}]},
 orb2:{once:h=>{h.f.orb=1;h.items.ldagger=1;h.zap=1;if(h.cls==='mu')return 'הגולה מזהה את הקסם שבך, ושותקת.';const r=test({k:'save',i:4},h),x=R(2,6),dm=r.ok?Math.ceil(x/2):x;hurt(dm);return r.txt+'. זיק ברק: '+dm+' נזק.';},
  t:()=>`<p>בתוך המטה החלול – פגיון ארוך ודק, ניצב כחול כהה מעוטר בסימני ברקים. <b>פגיון הברקים:</b> +1 להתקפה ולנזק, פוגע גם במה שנשק רגיל לא פוגע, ופעם ביום – זיק ברק של 2ק6.</p>`,c:[{t:'להמשיך',go:'statue'}]},
 store:{t:()=>`<p>חדרון שישה על ארבעה. ריח העובש מכה בנחיריים. צנצנות שבורות ומשחות ישנות מעלות עובש בכל מקום. נראה שאין כאן כלום.</p>`,
- c:[{t:'לחפש בפינה הדרום־מערבית',if:h=>!h.f.bottle,go:'bottle'},{t:'לחפש עוד, בסבלנות',if:h=>!h.items.bkey,test:{k:'d6',n:2,l:'חיפוש'},w:1,ok:'bkey',no:'store',nomsg:'עובש, זכוכית, עובש.'},{t:'בחזרה לאולם הפסל',go:'statue'}]},
+ c:[{t:'לחפש בפינה הדרום־מערבית',if:h=>!h.f.bottle,go:'bottle'},{t:'לחפש עוד, בסבלנות',one:'bkey',if:h=>!h.items.bkey,test:{k:'d6',n:2,l:'חיפוש'},w:1,ok:'bkey',no:'store',nomsg:'עובש, זכוכית, עובש. אין כאן עוד דבר.'},{t:'בחזרה לאולם הפסל',go:'statue'}]},
 bottle:{once:h=>{h.f.bottle=1;h.treasure.push(['בקבוק בדולח',8]);return 'בקבוק בדולח: שווה 80 כסף.';},t:()=>`<p>בקבוק אחד שלם וריק, מוטל על צדו. בדולח מפותח ושיבוצים של זכוכית צבעונית. בעיר ישלמו עליו יפה.</p>`,c:[{t:'להמשיך',go:'store'}]},
 bkey:{once:h=>{h.items.bkey=1;return 'מפתח ברזל קטן וכחול.';},t:()=>`<p>מתחת לערימת צנצנות – מפתח ברזל קטן, צבוע כחול.</p>`,c:[{t:'להמשיך',go:'store'}]},
 corr2:{t:()=>`<p>מעבר לדלת המחוזקת – מסדרון. בצדו האחד דלת צבועה כחול דהוי. בצדו האחר – פתח רחב לאולם, וריח כבד של אדמה פתוחה.</p>`,
  c:[{t:'הדלת הכחולה',go:'bluedoor'},{t:'האולם',go:'sarc',if:h=>!h.f.zomb},{t:'אולם המתלמדים',go:'sarc_done',if:h=>h.f.zomb},{t:'בחזרה לאולם הפסל',go:'statue'}]},
 bluedoor:{route:h=>h.f.poolOpen?'pool':'bluedoor2'},
-bluedoor2:{t:()=>`<p>הדלת הכחולה נעולה.</p>`,c:[{t:'לפתוח במפתח הכחול',if:h=>h.items.bkey,go:'pool',fx:h=>{h.f.poolOpen=1;}},{t:'לפרוץ את המנעול',if:h=>h.cls==='thief',test:{k:'skill',s:'locks'},ok:'pool',no:'bluedoor2',okfx:h=>{h.f.poolOpen=1;},nomsg:'המנעול לא נכנע.'},{t:'לחזור',go:'corr2'}]},
+bluedoor2:{t:()=>`<p>הדלת הכחולה נעולה.</p>`,c:[{t:'לפתוח במפתח הכחול',if:h=>h.items.bkey,go:'pool',fx:h=>{h.f.poolOpen=1;}},{t:'לפרוץ את המנעול',one:'lock2',if:h=>h.cls==='thief',test:{k:'skill',s:'locks'},ok:'pool',no:'bluedoor2',okfx:h=>{h.f.poolOpen=1;},nomsg:'המנעול לא נכנע, ולא ייכנע.'},{t:'לחזור',go:'corr2'}]},
 pool:{t:()=>`<p>חלל עגול, קוטרו שישה מטרים. הרצפה חלקה מאוד, ושרידי פסיפס מחוק – פעם היו המרצפות צבועות כחול. אין יציאה נוספת. במרכז בריכה קטנה, מכוסה אזוב ואצות ולכלוך דוחה. מים שעמדו כאן יותר מדי שנים.</p>`,
- c:[{t:'לשתות מן המים',test:{k:'save',i:0,mod:3},ok:'drink_ok',no:'drink_bad'},{t:'למדוד את העומק במקל',if:h=>!h.f.chest,test:{k:'d6',n:2,l:'גישוש'},ok:'chest',no:'pool',nomsg:'מטר וחצי. בוצה דביקה בקרקעית. לא יותר.'},{t:'לחזור',go:'corr2'}]},
+ c:[{t:'לשתות מן המים',test:{k:'save',i:0,mod:3},ok:'drink_ok',no:'drink_bad'},{t:'למדוד את העומק במקל',one:'gauge',if:h=>!h.f.chest,test:{k:'d6',n:2,l:'גישוש'},ok:'chest',no:'pool',nomsg:'מטר וחצי. בוצה דביקה בקרקעית. לא יותר.'},{t:'לחזור',go:'corr2'}]},
 drink_ok:{once:h=>{h.f.slow=1;return 'כאבים חדים. התנועה איטית.';},t:()=>`<p>המים מרים כמו מרה. הקאות. כאבים. אבל את{ה|} חי{|ה}.</p>`,c:[{t:'להמשיך',go:'pool'}]},
 drink_bad:{t:()=>`<p>הבחילה לא עוברת. חצי שעה של הקאות על רצפת הפסיפס הכחול, ואז שקט.</p>`,c:[],death:'מת{|ה} מן המים הרעים, בחדר הבריכה הכחולה.'},
 chest:{t:()=>`<p>המקל נתקל במשהו קשה וישר בקרקעית: תיבת אבן. כבדה. המים הדוחים צורבים את העור.</p>`,
@@ -454,12 +454,18 @@ function fleeFight(){
 }
 
 /* ================= ניווט ================= */
+function visChoices(node,h){const out=[];(node.c||[]).forEach(c=>{if(c.if&&!c.if(h))return;
+ if(c.one&&h.f['t_'+c.one]){if(h.f['r_'+c.one]){out.push(Object.assign({},c,{sure:1,t:c.t+' – בעיניים רעננות',sub:'אחרי המנוחה: הצלחה בטוחה'}));return;}
+  if(h.luck>0)out.push(Object.assign({},c,{retry:1,t:c.t+' – שוב',sub:'עולה נקודת מזל (נשארו '+h.luck+')'}));return;}
+ out.push(c);});return out;}
 function choose(c){
  const h=S.h;S.roll='';S.note='';
+ if(c.sure){delete h.f['r_'+c.one];S.roll='אחרי המנוחה, בעיניים רעננות – <span class="ok">הצלחה</span>';if(c.okfx)c.okfx(h);return go(c.ok);}
+ if(c.retry){h.luck--;S.note='נקודת מזל הושקעה.';}
  if(c.fx)c.fx(h);
- if(c.rest){h.f['rest'+c.rest]=1;const x=Math.ceil(h.max/2);h.hp=Math.min(h.max,h.hp+x);h.slots=slotsMax(h);h.cure=(h.cls==='cleric'&&h.diff==='classic')?1:0;h.zap=h.items.ldagger?1:0;h.brooch=h.items.brooch?1:0;S.note='מנוחה: +'+x+' נקודות פגיעה'+(h.cls==='mu'?', והלחשים חוזרים':h.cls==='cleric'&&h.cure?', ותפילת הריפוי חוזרת':'')+'.';return wander(S.page);}
+ if(c.rest){h.f['rest'+c.rest]=1;Object.keys(h.f).forEach(k=>{if(k.startsWith('t_')&&!k.startsWith('t_lock'))h.f['r_'+k.slice(2)]=1;});const x=Math.ceil(h.max/2);h.hp=Math.min(h.max,h.hp+x);h.slots=slotsMax(h);h.cure=(h.cls==='cleric'&&h.diff==='classic')?1:0;h.zap=h.items.ldagger?1:0;h.brooch=h.items.brooch?1:0;S.note='מנוחה: +'+x+' נקודות פגיעה'+(h.cls==='mu'?', והלחשים חוזרים':h.cls==='cleric'&&h.cure?', ותפילת הריפוי חוזרת':'')+'.';return wander(S.page);}
  if(c.fight)return startFight(c.fight,{surprise:c.surprise,first:c.first,win:c.win});
- if(c.test){const r=test(c.test,h);S.roll=r.txt;S.lastTest={c:S.page,i:S.cur.indexOf(c)};S.canLuck=!r.ok&&h.luck>0;
+ if(c.test){const r=test(c.test,h);S.roll=r.txt;S.lastTest={c:S.page,i:S.cur.indexOf(c),one:c.one};if(c.one)h.f['t_'+c.one]=1;S.canLuck=!r.ok&&h.luck>0;
   if(r.ok){if(c.okfx)c.okfx(h);return c.w?wander(c.ok):go(c.ok);}
   if(c.nomsg)S.note=c.nomsg;return c.w?wander(c.no):go(c.no);}
  return c.w?wander(c.go):go(c.go);
@@ -471,7 +477,7 @@ function wander(to){
 }
 function useLuck(){
  const L=S.lastTest;if(!L||S.h.luck<=0)return;S.h.luck--;
- S.page=L.c;const node=N[L.c];S.cur=node.c.filter(x=>!x.if||x.if(S.h));const c=S.cur[L.i];S.roll='';
+ S.page=L.c;if(L.one)delete S.h.f['t_'+L.one];const node=N[L.c];S.cur=visChoices(node,S.h);const c=S.cur[L.i];S.roll='';
  if(!c)return render();S.note='נקודת מזל: גלגול חוזר.';const keep=S.note;choose(c);if(!S.note)S.note=keep;
 }
 function go(id){
@@ -530,7 +536,7 @@ function render(){
  if(S.page==='__create'){m.innerHTML=pageWrap(createHTML(),0);bindCreate();sheet();return;}
  if(S.page==='__dead'){m.innerHTML=pageWrap(`<h2>הסוף</h2><div class="txt"><p>${esc(S.h.name)} ${esc(S.dead)}</p><p>המגדל שותק שוב. הטחב יכסה גם את זה.</p></div>${S.roll?'<p class="roll">'+S.roll+'</p>':''}<ul class="choices"><li><button id="again">לפתוח את הספר מחדש</button></li></ul>`,'†');$('again').onclick=()=>{try{localStorage.removeItem(KEY);}catch(e){}S=null;render();};sheet();return;}
  if(S.page==='__fight'){m.innerHTML=pageWrap(fightHTML(),S.pno.__f||'⚔');bindFight();sheet();return;}
- const node=N[S.page],h=S.h;const cs=(node.c||[]).filter(c=>!c.if||c.if(h));S.cur=cs;
+ const node=N[S.page],h=S.h;const cs=visChoices(node,h);S.cur=cs;
  if(node.death)return die(g(node.death));
  const head=(S.roll?`<p class="roll"><span class="dieanim">⚄</span> ${S.roll}${S.note?' · '+g(S.note):''}</p>`:(S.note?`<p class="roll">${g(S.note)}</p>`:''));
  const luck=(S.canLuck&&S.lastTest&&h.luck>0&&S.roll)?`<button class="luck" id="luckB">להשתמש בנקודת מזל ולגלגל שוב (נשארו ${h.luck})</button>`:'';
@@ -639,7 +645,7 @@ function musicScene(sc){if(sc===scene)return;scene=sc;mix();}
 $('sndB').onclick=()=>{SND.on=!SND.on;sndSave();sndUI();if(SND.on)musicStart();else setVol(0.2);};
 $('sndV').oninput=e=>{SND.vol=+e.target.value;if(!SND.on&&SND.vol>0){SND.on=true;sndUI();musicStart();}sndSave();setVol(0.1);};
 document.addEventListener('click',e=>{if(e.target.closest('#open,#cont'))musicStart();},true);
-window.__g=()=>S;window.__t={newHero,startFight,heroAct,rollAb,setS:x=>{S=x;}};
+window.__g=()=>S;window.__t={newHero,startFight,heroAct,rollAb,setS:x=>{S=x;},go:id=>go(id)};
 let kb='',taps=0,tapT=0;
 function toggleGod(){if(!S||!S.h)return;S.god=!S.god;S.note=S.god?'✦':'';save();render();}
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;kb=(kb+(e.key||'')).slice(-5).toLowerCase();if(kb==='tamir'||kb==='אשצןר'){kb='';toggleGod();}});
