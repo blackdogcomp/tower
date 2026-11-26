@@ -121,12 +121,12 @@ function load(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(
 const CL={
  fighter:{n:'לוחם',nf:'לוחמת',hd:8,ac:14,sh:1,w:'חרב ארוכה',dmg:8,sv:[12,13,14,15,16],blurb:'שריון שרשראות ומגן, חרב ארוכה. הרבה נקודות פגיעה.'},
  cleric:{n:'כוהן',nf:'כוהנת',hd:6,ac:14,sh:1,w:'אלה',dmg:6,sv:[11,12,14,16,15],blurb:'שרשראות ומגן, אלה. מגרש{|ת} אל־מתים, ומרפא{|ת} פצעים פעם בין מנוחה למנוחה.'},
- mu:{n:'קוסם',nf:'קוסמת',hd:4,ac:10,sh:0,w:'פגיון',dmg:4,sv:[13,14,13,16,15],blurb:'בלי שריון, פגיון. ארבעה לחשים בין מנוחה למנוחה, ולחש חוזר אחרי כל ניצחון.'},
+ mu:{n:'קוסם',nf:'קוסמת',hd:4,ac:10,sh:0,w:'פגיון',dmg:4,sv:[13,14,13,16,15],blurb:'בלי שריון, פגיון. ארבעה לחשים בין מנוחה למנוחה, וקליע הקסם יורה שני קליעים.'},
  thief:{n:'גנב',nf:'גנבת',hd:4,ac:12,sh:0,w:'חרב קצרה',dmg:6,sv:[13,14,13,16,15],blurb:'שריון עור. מתגנב{|ת}, מטפס{|ת}, פותח{|ת} מנעולים. נבלע{|ת} בצללים באמצע קרב ודוקר{|ת} בגב.'}};
 const SVN=['מוות או רעל','שרביט קסם','שיתוק או התאבנות','נשיפת דרקון','לחש'];
 const THIEF={locks:15,traps:10,remove:10,climb:87,silent:20,hide:10,hear:30};
 const THIEF2={locks:20,traps:15,remove:15,climb:88,silent:25,hide:15,hear:35};
-const LVL={fighter:2,cleric:2,mu:2,thief:2};
+const LVL={fighter:2,cleric:1,mu:2,thief:2};
 const NEXT={fighter:[2000,4000],cleric:[1500,3000],mu:[2500,5000],thief:[1200,2400]};
 const DIFF={story:'סיפור',classic:'קלאסי',hard:'קשוח'};
 const SKN={locks:'פתיחת מנעולים',traps:'מציאת מלכודות',remove:'פירוק מלכודות',climb:'טיפוס',silent:'תנועה בדממה',hide:'הסתתרות',hear:'שמיעה'};
@@ -158,16 +158,16 @@ function newHero(cls,abil,name,gnd,extra,spell,diff){
  h.diff=diff||'classic'; h.lvl=h.diff==='hard'?1:LVL[cls];
  const cm=mod(abil.con)*h.lvl;
  const hd=(h.diff!=='hard'&&cls!=='mu')?Math.max(6,c.hd):c.hd; /* גיבור יחיד: לפחות ק6, חוץ מקוסם */
- h.max=h.diff==='hard'?Math.max(2,c.hd+cm):Math.max(8,hd*2+4+(h.lvl-1)*hd+cm); if(h.diff==='story')h.max=Math.ceil(h.max*1.5); h.hp=h.max;
+ h.max=h.diff==='hard'?Math.max(2,c.hd+cm):(cls==='fighter'||cls==='cleric'?16:10); if(h.diff==='story')h.max=Math.ceil(h.max*1.5); h.hp=h.max;
  h.luck=Math.max(1,3+mod(abil.cha)+(h.diff==='story'?2:0)); h.silver=20; h.gold=0; h.xp=0;
- h.items={torch:6,potion:2}; h.items[extra]=extra==='oil'?2:1; if(cls==='thief')h.items.tools=1;
+ h.items={torch:6,potion:h.diff==='hard'?1:{fighter:2,cleric:2,mu:2,thief:4}[cls]}; h.items[extra]=extra==='oil'?2:1; if(cls==='thief')h.items.tools=1;
  h.spells=cls==='mu'?(h.diff==='hard'?['sleep','missile']:['sleep','missile','shield']):[]; h.slots=slotsMax(h); h.zap=0; h.brooch=0;
- h.cure=(cls==='cleric'&&h.lvl>=2)?1:0;
+ h.cure=(cls==='cleric'&&h.diff==='classic')?1:0;
  h.f={}; h.floor=1; h.treasure=[];
  return h;
 }
 function slotsMax(h){return h.cls!=='mu'?0:h.diff==='hard'?1:h.lvl>=2?4:2;}
-function AC(h){const c=CL[h.cls];let a=c.ac+c.sh+mod(h.ab.dex)+(h.cls==='thief'&&h.diff!=='hard'?1:0);if(h.f.corroded)a--;if(h.items.ring)a++;if(h.items.cloak)a++;if(h.f.curse)a-=2;return a;}
+function AC(h){const c=CL[h.cls];let a=c.ac+c.sh+mod(h.ab.dex)+(h.cls==='thief'&&h.diff!=='hard'?2:0);if(h.f.corroded)a--;if(h.items.ring)a++;if(h.items.cloak)a++;if(h.f.curse)a-=2;return a;}
 function weapon(h,vsMagic){ // הנשק הטוב ביותר. נגד מי שנפגע רק מקסם – הפגיון הקסום
  const c=CL[h.cls];
  if(h.items.ldagger&&(vsMagic||c.dmg<=6))return {n:'פגיון הברקים',die:4,plus:1,hit:1,magic:1};
@@ -377,7 +377,7 @@ function doAction(kind,arg,free){
  }
  if(kind==='spell'){
   h.slots--;
-  if(arg==='missile'){const x=R(1,6,1);t.hp-=x;flog('קליע קסם פוגע ב'+t.n+': '+x+' נזק.','hit');if(t.hp<=0)gotKill(t);}
+  if(arg==='missile'){const two=h.diff!=='hard',x=two?R(1,6,1)+R(1,6,1):R(1,6,1);t.hp-=x;flog((two?'שני קליעי קסם פוגעים ב':'קליע קסם פוגע ב')+t.n+': '+x+' נזק.','hit');if(t.hp<=0)gotKill(t);}
   if(arg==='sleep'){let hd=R(2,8),n=0;alive().filter(f=>!f.und&&f.hd<=4).sort((a,b)=>a.hd-b.hd).forEach(f=>{if(hd>=f.hd){hd-=f.hd;f.asleep=1;n++;}});flog(n?'שינה: '+n+' נרדמים.':'השינה אינה פועלת על הדבר הזה.','hit');}
   if(arg==='shield'){F.shield=1;flog('אוויר מתקשה סביבך: דרג״ש 17 בקרב הזה.');}
   if(arg==='light'){t.blind=1;flog('אור עז על עיני '+t.n+': −4 להתקפות שלו.');}
@@ -388,7 +388,7 @@ function doAction(kind,arg,free){
   else if(v>=need){let b=R(2,6),n=0;und.forEach(f=>{if(b>=f.hd){b-=f.hd;f.gone=1;n++;}});if(!n){und[0].gone=1;n=1;}flog('2ק6 = '+v+' (צריך '+need+'): '+n+' נסוגים אל החושך.','hit');}
   else flog('2ק6 = '+v+' (צריך '+need+'): המתים לא נרתעים.');
  }
- if(kind==='hide'){F.hid=1;const r=test({k:'skill',s:'hide'},h);const ok=r.ok||d(6)<=(h.diff==='hard'?1:4);if(ok){F.hidden=1;flog('את{ה|} נבלע{|ת} בצללים. ההתקפה הבאה: דקירה בגב.','hit');}else flog('הצל לא מסתיר אותך מספיק.');}
+ if(kind==='hide'){F.hid=1;const r=test({k:'skill',s:'hide'},h);const ok=r.ok||d(6)<=(h.diff==='hard'?1:4);if(ok){F.hidden=1;flog('את{ה|} נבלע{|ת} בצללים – ומגיח{|ה} מאחוריו.','hit');doAction('atk',null,false);}else flog('הצל לא מסתיר אותך מספיק.');}
  if(kind==='cure'){h.cure=0;const x=R(1,6,1);h.hp=Math.min(h.max,h.hp+x);flog('ריפוי פצעים קלים: +'+x+' נקודות פגיעה.');}
  if(kind==='potion'){h.items.potion--;const x=R(1,6,1);h.hp=Math.min(h.max,h.hp+x);flog('שיקוי ריפוי: +'+x+' נקודות פגיעה.');}
  if(kind==='brooch'){h.brooch=0;const x=h.cls==='mu'?R(1,4,1):d(4);h.hp=Math.min(h.max,h.hp+x);flog('הסיכה מתחממת: +'+x+' נקודות פגיעה.');}
@@ -431,7 +431,7 @@ function checkEnd(){
  if(alive().length)return false;
  let xp=0;F.foes.forEach(f=>{if(f.hp<=0||f.fled)xp+=f.xp;});gain(xp);
  h.f.bless=0;
- let extra='';if(h.cls==='mu'&&h.diff!=='hard'&&h.slots<slotsMax(h)){h.slots++;extra=' נשימה עמוקה: לחש אחד חוזר.';}
+ let extra='';
  const def=FIGHTS[F.id]||{};if(def.onWin)def.onWin(h);if(F.foes.some(f=>f.fled)&&def.onFled)def.onFled(h);
  S.note='ניצחון. '+xp+' נק״ן.'+extra;const to=F.ret||F.win;S.fight=null;go(to);return true;
 }
@@ -446,7 +446,7 @@ function fleeFight(){
 function choose(c){
  const h=S.h;S.roll='';S.note='';
  if(c.fx)c.fx(h);
- if(c.rest){h.f['rest'+c.rest]=1;const x=Math.ceil(h.max/2);h.hp=Math.min(h.max,h.hp+x);h.slots=slotsMax(h);h.cure=(h.cls==='cleric'&&h.lvl>=2)?1:0;h.zap=h.items.ldagger?1:0;h.brooch=h.items.brooch?1:0;S.note='מנוחה: +'+x+' נקודות פגיעה'+(h.cls==='mu'?', והלחשים חוזרים':h.cls==='cleric'&&h.cure?', ותפילת הריפוי חוזרת':'')+'.';return wander(S.page);}
+ if(c.rest){h.f['rest'+c.rest]=1;const x=Math.ceil(h.max/2);h.hp=Math.min(h.max,h.hp+x);h.slots=slotsMax(h);h.cure=(h.cls==='cleric'&&h.diff==='classic')?1:0;h.zap=h.items.ldagger?1:0;h.brooch=h.items.brooch?1:0;S.note='מנוחה: +'+x+' נקודות פגיעה'+(h.cls==='mu'?', והלחשים חוזרים':h.cls==='cleric'&&h.cure?', ותפילת הריפוי חוזרת':'')+'.';return wander(S.page);}
  if(c.fight)return startFight(c.fight,{surprise:c.surprise,first:c.first,win:c.win});
  if(c.test){const r=test(c.test,h);S.roll=r.txt;S.lastTest={c:S.page,i:S.cur.indexOf(c)};S.canLuck=!r.ok&&h.luck>0;
   if(r.ok){if(c.okfx)c.okfx(h);return c.w?wander(c.ok):go(c.ok);}
@@ -533,7 +533,7 @@ function fightHTML(){
  const F=S.fight,h=S.h;if(!alive().includes(F.foes[F.sel]))F.sel=F.foes.indexOf(alive()[0]);
  const und=alive().some(f=>f.und),acts=[`<button data-a="atk">התקפה</button>`];
  if(h.cls==='mu'&&h.slots>0)h.spells.forEach(s=>acts.push(`<button data-a="spell" data-x="${s}">${SPELLS[s]}</button>`));
- if(h.cls==='thief'&&!F.hidden)acts.push(`<button data-a="hide">להיבלע בצללים</button>`);
+ if(h.cls==='thief'&&!F.hidden)acts.push(`<button data-a="hide">להיבלע בצללים ולדקור</button>`);
  if(h.cls==='cleric'&&und&&!F.turned)acts.push(`<button data-a="turn">גירוש אל־מתים</button>`);
  if(h.zap)acts.push(`<button data-a="zap" class="sec">זיק ברק</button>`);
  if(h.items.oil)acts.push(`<button data-a="oil" class="sec">לזרוק שמן (${h.items.oil})</button>`);
@@ -579,7 +579,7 @@ function createHTML(){
  <div class="row"><button class="big alt" id="reroll" style="color:var(--ink);border-color:var(--ink)" ${CR.rolls?'':'disabled'}>לגלגל מחדש (${CR.rolls})</button>
  <span>נקודות פגיעה <b>${hp}</b> · דרג״ש <b>${ac}</b> · מזל <b>${pv.luck}</b> · דרגה <b>${pv.lvl}</b></span></div>
  <p style="margin:12px 0 4px">רמת קושי:</p><div class="seg"><button data-d="classic" aria-pressed="${CR.diff==='classic'}">קלאסי</button><button data-d="hard" aria-pressed="${CR.diff==='hard'}">קשוח</button></div>
- <p class="roll" style="margin:6px 0 0">${{classic:'התאמות לגיבור יחיד: נקודות פגיעה מוגדלות, +1 להתקפה. כל הגיבורים מתחילים בדרגה 2.',hard:'כמו בספר: דרגה 1, נקודות פגיעה רגילות, בלי הקלות.'}[CR.diff]}</p>
+ <p class="roll" style="margin:6px 0 0">${{classic:'התאמות לגיבור יחיד: 16 נקודות פגיעה ללוחם ולכוהן, 10 לקוסם ולגנב, +1 להתקפה. לוחם, קוסם וגנב מתחילים בדרגה 2.',hard:'כמו בספר: דרגה 1, נקודות פגיעה רגילות, בלי הקלות.'}[CR.diff]}</p>
  <p style="margin:12px 0 4px">ציוד: לפידים, מימייה, מזון${CR.cls==='thief'?', כלי גנב':''}. ועוד דבר אחד:</p>
  <div class="seg">${Object.keys(EXTRA).map(k=>`<button data-x="${k}" aria-pressed="${CR.extra===k}">${EXTRA[k]}</button>`).join('')}</div>
  ${CR.cls==='mu'?`<p style="margin:12px 0 4px">בספר הלחשים: שינה, קליע קסם${CR.diff==='hard'?'':', מגן'}.</p>`:''}
