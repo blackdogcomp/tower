@@ -76,9 +76,14 @@ input[type=text]{font:inherit;font-size:17px;padding:8px 10px;border:1px solid #
 .acts button{background:var(--ink);color:var(--paper);border:0;padding:9px 14px;min-height:44px;border-radius:2px}
 .acts button.sec{background:transparent;color:var(--ink);border:1px solid var(--ink)}
 .acts button:hover{background:var(--blood)}
-.flog{font-size:17.5px;max-height:240px;overflow:auto;border-top:1px dashed var(--line);padding-top:6px;margin:0;list-style:none}
-.flog li{padding:1px 0}.flog li:first-child{font-weight:700;color:var(--ink)}
-.flog li.hit{color:var(--blood2)}
+.flog{font-size:17.5px;max-height:340px;overflow:auto;border-top:1px dashed var(--line);padding-top:6px;margin:0;list-style:none}
+.flog ul{list-style:none;margin:2px 0 8px;padding:0}.flog li{padding:1px 0}
+.flog .rnd>b{font:700 15px "Frank Ruhl Libre",serif;color:var(--dim)}
+.flog .rnd.old{opacity:.62}
+.flog li.hit{color:#8a3a08}
+.flog li.me{font-weight:700;color:var(--ink);border-inline-start:3px solid var(--blood2);padding-inline-start:8px}
+.flog li.me.hit{color:#6b3a05}
+.flog .who{color:var(--blood)}
 /* ---- sheet ---- */
 .sheet{position:sticky;top:16px;background:var(--bg2);border:1px solid #3d2f17;padding:16px 16px 18px;border-radius:3px;font-size:15.5px}
 .sheet h3{font:900 22px "Frank Ruhl Libre",serif;margin:0;color:#efc46a}
@@ -348,22 +353,24 @@ function startFight(id,opt){
  foes.forEach(f=>{f.max=f.hp;});
  S.fight={id:Array.isArray(id)?null:id,foes,round:1,log:[],sel:0,surprise:opt&&opt.surprise,first:opt&&opt.first,turned:0,shield:0,firstDown:0,half:0,ret:opt&&opt.ret,
   win:opt&&opt.win||def.win,flee:def.flee||null,slow:def.slow};
- if(def.pre){const m=def.pre(S.h);if(m)S.fight.log.unshift(m);}
- if(S.fight.surprise)S.fight.log.unshift('הפתעה! הסבב הראשון שלך.');
- if(S.fight.slow)S.fight.log.unshift('המתים קמים לאט: הסבב הראשון שלך.');
- if(S.h.f.bless)S.fight.log.unshift('ברכת הנרות: +2 להתקפה בקרב הזה.');
+ S.fight.rounds=[{r:0,l:[]}];
+ if(def.pre){const m=def.pre(S.h);if(m)flog(m,'hit');}
+ if(S.fight.surprise)flog('הפתעה! הסבב הראשון שלך.');
+ if(S.fight.slow)flog('המתים קמים לאט: הסבב הראשון שלך.');
+ if(S.h.f.bless)flog('ברכת הנרות: +2 להתקפה בקרב הזה.');
  S.page='__fight';save();render();
  if(S.h.hp<=0)die('נפל{|ה} לפני שהקרב התחיל.');
 }
 const alive=()=>S.fight.foes.filter(f=>f.hp>0&&!f.gone);
-function flog(m,c){S.fight.log.unshift((c?'<span class="'+c+'">':'')+m+(c?'</span>':''));}
+function flog(m,c){const F=S.fight;if(!F.rounds)F.rounds=[{r:F.round||1,l:[]}];F.rounds[F.rounds.length-1].l.push({m,c:c||'',me:F.me?1:0});}
 function heroAct(kind,arg){
  const F=S.fight,h=S.h;
+ F.rounds=F.rounds||[];F.rounds.push({r:F.round,l:[]});
  const freeRound=(F.round===1&&(F.surprise||F.slow||F.first));
  let foesFirst=false;
  if(!freeRound){const a=d(6),b=d(6);foesFirst=b>a;flog('יוזמה: '+a+' מול '+b+(foesFirst?' – הם ראשונים':' – את{ה|} ראשון{|ה}'));}
  if(foesFirst){foesAttack();if(S.h.hp<=0||S.h.max<=0)return die(g('נפל{|ה} בקרב.'));if(checkEnd())return;}
- doAction(kind,arg,freeRound);
+ F.me=1;doAction(kind,arg,freeRound);F.me=0;
  if(checkEnd())return;
  if(!foesFirst&&!freeRound){foesAttack();if(S.h.hp<=0||S.h.max<=0)return die(g('נפל{|ה} בקרב.'));if(checkEnd())return;}
  F.round++;save();render();
@@ -550,7 +557,7 @@ function fightHTML(){
  if(F.flee)acts.push(`<button data-a="flee" class="sec">לברוח</button>`);
  return `<h2>קרב · סבב ${F.round}</h2>
  <div class="fight" role="group" aria-label="אויבים">${F.foes.map((f,i)=>`<div class="foe${(f.hp<=0||f.gone)?' out':''}" data-f="${i}" aria-selected="${i===F.sel&&f.hp>0&&!f.gone}"><div><b>${esc(f.n)}</b> <small>דרג״ש ${f.ac}${f.slept?' · ישן':''}${f.und?' · מת מהלך':''}${f.magic?' · רק קסם פוגע בו':''}${f.fled?' · ברח':f.gone?' · נסוג':''}</small></div><div class="hp"><i style="width:${Math.max(0,f.hp)/f.max*100}%"></i></div></div>`).join('')}
- <div class="acts">${acts.join('')}</div><ul class="flog">${F.log.slice(0,12).map(l=>'<li'+(l.includes('class="hit"')?' class="hit"':'')+'>'+g(l)+'</li>').join('')}</ul></div>
+ <div class="acts">${acts.join('')}</div><div class="flog">${(F.rounds||[]).filter(r=>r.l.length).slice(-4).reverse().map((r,i)=>`<div class="rnd${i?' old':''}"><b>${r.r?'סבב '+r.r:'לפני הקרב'}</b><ul>${r.l.map(x=>`<li class="${x.c}${x.me?' me':''}">${x.me?'<span class="who">'+esc(h.name)+':</span> ':''}${g(x.m)}</li>`).join('')}</ul></div>`).join('')}</div></div>
  <p class="roll" style="margin-top:12px">לחצו על אויב כדי לבחור במי לפגוע. דרג״ש שלך: ${S.fight.shield?Math.max(17,AC(h)):AC(h)} · נק״פ ${Math.max(0,h.hp)}/${h.max}</p>`;
 }
 function bindFight(){
