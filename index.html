@@ -96,7 +96,7 @@ input[type=text]{font:inherit;font-size:17px;padding:8px 10px;border:1px solid #
 .snd button{width:40px;height:40px;border-radius:50%;border:1px solid #8a5208;background:#2a2010;color:#efc46a;font-size:18px;line-height:1}
 .snd input{width:90px;accent-color:#b8730c}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.sheet{position:static;order:-1}.sheet.fold ul,.sheet.fold .tools,.sheet.fold .more{display:none}}
+@media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.sheet{position:static;order:-1}.sheet.fold ul,.sheet.fold .more{display:none}}
 @media(max-width:600px){.abil{grid-template-columns:repeat(3,minmax(0,1fr))}.foe{grid-template-columns:minmax(0,1fr) 80px}body{font-size:16.5px}}
 </style>
 </head>
@@ -382,7 +382,7 @@ function doAction(kind,arg,free){
  if(kind==='spell'){
   h.slots--;
   if(arg==='missile'){const two=h.diff!=='hard',x=two?R(1,6,1)+R(1,6,1):R(1,6,1);t.hp-=x;flog((two?'שני קליעי קסם פוגעים ב':'קליע קסם פוגע ב')+t.n+': '+x+' נזק.','hit');if(t.hp<=0)gotKill(t);}
-  if(arg==='sleep'){let hd=R(2,8),n=0;alive().filter(f=>!f.und&&f.hd<=4).sort((a,b)=>a.hd-b.hd).forEach(f=>{if(hd>=f.hd){hd-=f.hd;f.asleep=1;n++;}});flog(n?'שינה: '+n+' נרדמים.':'השינה אינה פועלת על הדבר הזה.','hit');}
+  if(arg==='sleep'){let hd=R(2,8),n=0;alive().filter(f=>!f.und&&f.hd<=4).sort((a,b)=>a.hd-b.hd).forEach(f=>{if(hd>=f.hd){hd-=f.hd;f.hp=0;f.slept=1;n++;gotKill(f);}});flog(n?'שינה: '+n+' צונחים לתרדמה עמוקה – והקרב נגמר בשבילם.':'השינה אינה פועלת על הדבר הזה.','hit');}
   if(arg==='shield'){F.shield=1;flog('אוויר מתקשה סביבך: דרג״ש 17 בקרב הזה.');}
   if(arg==='light'){t.blind=1;flog('אור עז על עיני '+t.n+': −4 להתקפות שלו.');}
  }
@@ -549,7 +549,7 @@ function fightHTML(){
  if(h.brooch&&h.hp<h.max)acts.push(`<button data-a="brooch" class="sec">סיכת הריפוי</button>`);
  if(F.flee)acts.push(`<button data-a="flee" class="sec">לברוח</button>`);
  return `<h2>קרב · סבב ${F.round}</h2>
- <div class="fight" role="group" aria-label="אויבים">${F.foes.map((f,i)=>`<div class="foe${(f.hp<=0||f.gone)?' out':''}" data-f="${i}" aria-selected="${i===F.sel&&f.hp>0&&!f.gone}"><div><b>${esc(f.n)}</b> <small>דרג״ש ${f.ac}${f.asleep?' · ישן':''}${f.und?' · מת מהלך':''}${f.magic?' · רק קסם פוגע בו':''}${f.fled?' · ברח':f.gone?' · נסוג':''}</small></div><div class="hp"><i style="width:${Math.max(0,f.hp)/f.max*100}%"></i></div></div>`).join('')}
+ <div class="fight" role="group" aria-label="אויבים">${F.foes.map((f,i)=>`<div class="foe${(f.hp<=0||f.gone)?' out':''}" data-f="${i}" aria-selected="${i===F.sel&&f.hp>0&&!f.gone}"><div><b>${esc(f.n)}</b> <small>דרג״ש ${f.ac}${f.slept?' · ישן':''}${f.und?' · מת מהלך':''}${f.magic?' · רק קסם פוגע בו':''}${f.fled?' · ברח':f.gone?' · נסוג':''}</small></div><div class="hp"><i style="width:${Math.max(0,f.hp)/f.max*100}%"></i></div></div>`).join('')}
  <div class="acts">${acts.join('')}</div><ul class="flog">${F.log.slice(0,12).map(l=>'<li'+(l.includes('class="hit"')?' class="hit"':'')+'>'+g(l)+'</li>').join('')}</ul></div>
  <p class="roll" style="margin-top:12px">לחצו על אויב כדי לבחור במי לפגוע. דרג״ש שלך: ${S.fight.shield?Math.max(17,AC(h)):AC(h)} · נק״פ ${Math.max(0,h.hp)}/${h.max}</p>`;
 }
